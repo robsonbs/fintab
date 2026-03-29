@@ -10,7 +10,9 @@
     "test": "jest --runInBand --verbose",
     "test:watch": "jest --watchAll --runInBand --verbose",
     "lint:prettier:check": "prettier --check .",
-    "lint:prettier:fix": "prettier --write ."
+    "lint:prettier:fix": "prettier --write .",
+    "services:down": "docker compose -f infra/compose.yaml down",
+    "services:up": "docker compose -f infra/compose.yaml up -d"
   },
   "engines": {
     "node": "24"
