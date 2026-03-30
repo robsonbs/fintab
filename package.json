@@ -9,6 +9,9 @@
     "dev": "npm run services:up && next dev",
     "lint:prettier:check": "prettier --check .",
     "lint:prettier:fix": "prettier --write .",
+    "migrations:create": "node-pg-migrate -m infra/migrations create",
+    "migrations:up:dry": "node-pg-migrate -m infra/migrations --envPath .env.development --dry-run up",
+    "migrations:up": "node-pg-migrate -m infra/migrations --envPath .env.development up",
     "services:down": "docker compose -f infra/compose.yaml down",
     "services:logs": "docker compose -f infra/compose.yaml logs -f",
     "services:restart": "npm run services:down && npm run services:up",
@@ -21,7 +24,9 @@
     "node": "24"
   },
   "dependencies": {
+    "dotenv": "^16.4.4",
     "next": "^13.1.6",
+    "node-pg-migrate": "6.2.2",
     "pg": "8.11.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
