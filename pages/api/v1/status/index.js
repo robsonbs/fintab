@@ -2,9 +2,13 @@ import database from "infra/database.js";
 
 async function status(request, response) {
   const updatedAt = new Date().toISOString();
+  const appEnv = process.env.APP_ENV || process.env.NODE_ENV || "unknown";
 
   const databaseVersionResult = await database.query({
-    text: `SELECT (SELECT COUNT(*)::int from pg_stat_activity WHERE datname = $1) as "openConnections", current_setting('max_connections')::int as "maxConnections", current_setting('server_version') as "serverVersion"`,
+    text: `SELECT
+    current_setting('server_version') as "version",
+    current_setting('max_connections')::int as "max_connections",
+    (SELECT COUNT(*)::int from pg_stat_activity WHERE datname = $1) as "open_connections"`,
     values: [process.env.POSTGRES_DB],
   });
 
@@ -12,9 +16,8 @@ async function status(request, response) {
     updated_at: updatedAt,
     dependencies: {
       database: {
-        version: databaseVersionResult.rows[0].serverVersion,
-        max_connections: databaseVersionResult.rows[0].maxConnections,
-        open_connections: databaseVersionResult.rows[0].openConnections,
+        environment: appEnv,
+        ...databaseVersionResult.rows[0],
       },
     },
   });
