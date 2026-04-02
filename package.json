@@ -6,20 +6,22 @@
   "author": "Robson Barbosa Souza <powerrob92@gmail.com>",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run services:up && npm run wait-for-postgres && npm run migrations:up && next dev",
+    "dev": "npm run services:up && npm run services:wait:database && npm run migrations:up && (trap 'npm run postdev' INT TERM ; next dev)",
     "lint:prettier:check": "prettier --check .",
     "lint:prettier:fix": "prettier --write .",
     "migrations:create": "node-pg-migrate -m infra/migrations create",
     "migrations:up:dry": "node-pg-migrate -m infra/migrations --envPath .env.development --dry-run up",
     "migrations:up": "node-pg-migrate -m infra/migrations --envPath .env.development up",
+    "postdev": "npm run services:down",
+    "posttest": "npm run services:stop",
     "services:down": "docker compose -f infra/compose.yaml down",
     "services:logs": "docker compose -f infra/compose.yaml logs -f",
     "services:restart": "npm run services:down && npm run services:up",
     "services:stop": "docker compose -f infra/compose.yaml stop",
     "services:up": "docker compose -f infra/compose.yaml up -d",
+    "services:wait:database": "node infra/scripts/wait-for-postgres.js",
     "test:watch": "jest --watchAll --runInBand --verbose",
-    "test": "jest --runInBand --verbose",
-    "wait-for-postgres": "node infra/scripts/wait-for-postgres.js"
+    "test": "npm run services:up && concurrently --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose\""
   },
   "engines": {
     "node": "24"
@@ -34,6 +36,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "concurrently": "9.1.2",
     "jest": "29.6.2",
     "prettier": "^3.8.1"
   }
