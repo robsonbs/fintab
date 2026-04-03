@@ -17,6 +17,7 @@ on:
       - "**/*.json"
       - "**/*.md"
       - ".prettierrc*"
+      - ".commitlintrc*"
       - "eslint.config.*"
       - "package.json"
       - "package-lock.json"
@@ -91,3 +92,27 @@ jobs:
 
       - name: Run Eslint check
         run: npm run lint:eslint:check
+
+  # Job dedicado para validar convencao de mensagens de commit no PR.
+  commitlint:
+    name: commitlint
+    runs-on: ubuntu-latest
+    # Evita consumo de runner enquanto o PR ainda estiver em modo draft.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Necessario para navegar no historico de commits do PR.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
+
+      - run: npm ci --no-audit --no-fund
+
+      - run: npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
