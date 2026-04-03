@@ -6,13 +6,13 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     # Evita acionar o pipeline quando mudancas nao impactam execucao de testes.
     paths:
-      - '.github/workflows/tests_flow.yaml'
-      - 'tests/**'
-      - 'pages/**'
-      - 'infra/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'jest.config.js'
+      - ".github/workflows/tests_flow.yaml"
+      - "tests/**"
+      - "pages/**"
+      - "infra/**"
+      - "package.json"
+      - "package-lock.json"
+      - "jest.config.js"
   # Permite execucao manual para depuracao de falhas no CI.
   workflow_dispatch:
 
@@ -49,9 +49,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: 'package.json'
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          node-version-file: "package.json"
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
 
       # Instala dependencias de forma reproduzivel com base no lockfile.
       - name: Install dependencies

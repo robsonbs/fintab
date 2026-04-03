@@ -1,0 +1,93 @@
+name: Linting
+
+on:
+  pull_request:
+    # Executa apenas nos eventos relevantes para ciclo de revisao.
+    types: [opened, synchronize, reopened, ready_for_review]
+    # Evita acionar o pipeline quando mudancas nao impactam lint/formatacao.
+    paths:
+      - ".github/workflows/lint_flow.yaml"
+      - ".github/workflows/tests_flow.yaml"
+      - "**/*.js"
+      - "**/*.jsx"
+      - "**/*.mjs"
+      - "**/*.cjs"
+      - "**/*.yml"
+      - "**/*.yaml"
+      - "**/*.json"
+      - "**/*.md"
+      - ".prettierrc*"
+      - "eslint.config.*"
+      - "package.json"
+      - "package-lock.json"
+  # Permite execucao manual para depuracao de falhas no CI.
+  workflow_dispatch:
+
+# Evita execucoes duplicadas para o mesmo branch/PR.
+concurrency:
+  group: lint-flow-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Menor privilegio necessario para este workflow.
+permissions:
+  contents: read
+
+# Variaveis globais para todos os jobs deste workflow.
+env:
+  # Sinaliza ambiente de CI para ferramentas e logs mais previsiveis.
+  CI: true
+  # Evita ruido de telemetria durante execucao no GitHub Actions.
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  # Job dedicado para validacao de formatacao com Prettier.
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    # Evita consumo de runner enquanto o PR ainda estiver em modo draft.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
+
+      - name: Install dependencies
+        # Desativa etapas nao essenciais no CI para reduzir tempo de instalacao.
+        run: npm ci --no-audit --no-fund
+
+      - name: Run Prettier check
+        run: npm run lint:prettier:check
+
+  # Job dedicado para validacao de padroes de codigo com ESLint.
+  eslint:
+    name: Eslint
+    runs-on: ubuntu-latest
+    # Evita consumo de runner enquanto o PR ainda estiver em modo draft.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
+
+      - name: Install dependencies
+        # Desativa etapas nao essenciais no CI para reduzir tempo de instalacao.
+        run: npm ci --no-audit --no-fund
+
+      - name: Run Eslint check
+        run: npm run lint:eslint:check
