@@ -53,6 +53,8 @@ beforeEach(async () => {
 });
 
 test("POST /api/v1/migrations applies pending migrations and then returns an empty list on repeat", async () => {
+  expect.hasAssertions();
+
   const { response: firstResponse, responseBody: firstResponseBody } =
     await postMigrations();
 

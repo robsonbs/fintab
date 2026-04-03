@@ -43,6 +43,8 @@ beforeEach(async () => {
 });
 
 test("POST /api/v1/migrations rejects unsupported HTTP methods with 405", async () => {
+  expect.hasAssertions();
+
   for (const method of UNSUPPORTED_METHODS) {
     const { response, responseBody } = await fetchWithUnsupportedMethod(method);
 

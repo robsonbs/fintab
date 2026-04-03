@@ -58,6 +58,8 @@ beforeEach(async () => {
 });
 
 test("GET /api/v1/migrations returns the list of pending migrations", async () => {
+  expect.hasAssertions();
+
   const { response, responseBody } = await fetchMigrations();
 
   expectOkJsonResponse(response);
@@ -65,6 +67,8 @@ test("GET /api/v1/migrations returns the list of pending migrations", async () =
 });
 
 test("GET /api/v1/migrations is idempotent and returns the same pending migrations", async () => {
+  expect.hasAssertions();
+
   const { response: firstResponse, responseBody: firstResponseBody } =
     await fetchMigrations();
 
