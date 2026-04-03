@@ -1,5 +1,5 @@
 import database from "infra/database";
-import migrationRunner from "node-pg-migrate";
+import { runner as migrationRunner } from "node-pg-migrate";
 import { join } from "node:path";
 
 const MIGRATIONS_DIR = join("infra", "migrations");
