@@ -1,0 +1,79 @@
+name: Automated Tests
+
+on:
+  pull_request:
+    # Executa apenas nos eventos relevantes para ciclo de revisao.
+    types: [opened, synchronize, reopened, ready_for_review]
+    # Evita acionar o pipeline quando mudancas nao impactam execucao de testes.
+    paths:
+      - '.github/workflows/tests_flow.yaml'
+      - 'tests/**'
+      - 'pages/**'
+      - 'infra/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'jest.config.js'
+  # Permite execucao manual para depuracao de falhas no CI.
+  workflow_dispatch:
+
+# Evita execucoes duplicadas para o mesmo branch/PR.
+concurrency:
+  group: tests-flow-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Menor privilegio necessario para este workflow.
+permissions:
+  contents: read
+
+jobs:
+  # Job unico responsavel por preparar ambiente e executar testes automatizados.
+  test:
+    name: Jest Ubuntu
+    runs-on: ubuntu-latest
+    # Evita consumo de runner enquanto o PR ainda estiver em modo draft.
+    if: ${{ github.event.pull_request.draft == false }}
+    timeout-minutes: 20
+
+    env:
+      # Sinaliza ambiente de CI para ferramentas e logs mais previsiveis.
+      CI: true
+      # Evita ruido de telemetria durante execucao no GitHub Actions.
+      NEXT_TELEMETRY_DISABLED: 1
+
+    steps:
+      # Recupera o codigo do commit/PR para o runner.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configura a versao do Node definida no projeto e habilita cache de dependencias.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      # Instala dependencias de forma reproduzivel com base no lockfile.
+      - name: Install dependencies
+        # Desativa etapas nao essenciais no CI para reduzir tempo de instalacao.
+        run: npm ci --no-audit --no-fund
+
+      # Executa a suite de testes automatizados do projeto.
+      - name: Run tests
+        run: npm test
+
+      # Etapas de diagnostico executadas apenas quando ocorre falha nos testes.
+      - name: Show database logs on failure
+        if: failure()
+        # Usa logs sem follow para nao bloquear o job em caso de falha.
+        run: docker compose -f infra/compose.yaml logs --tail=200 || true
+
+      - name: Show containers on failure
+        if: failure()
+        # Mostra estado dos containers para acelerar diagnostico no CI.
+        run: docker compose -f infra/compose.yaml ps || true
+
+      - name: Cleanup services
+        if: always()
+        # Cleanup nao deve mascarar o resultado real dos testes.
+        run: npm run services:down || true
