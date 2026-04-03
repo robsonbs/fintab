@@ -71,12 +71,16 @@ function expectValidDatabaseStatus(database) {
 }
 
 test("GET /api/v1/status returns 200 with content-type JSON", async () => {
+  expect.hasAssertions();
+
   const { response } = await fetchStatus();
 
   expectOkJsonResponse(response);
 });
 
 test("GET /api/v1/status returns valid database status fields", async () => {
+  expect.hasAssertions();
+
   const { response, responseBody } = await fetchStatus();
   const { dependencies, updated_at: updatedAt } = responseBody;
   const { database } = dependencies;
