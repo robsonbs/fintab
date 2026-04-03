@@ -41,15 +41,19 @@ function expectMethodNotAllowedErrorBody(responseBody, method) {
 beforeEach(async () => {
   await orchestrator.clearDatabase();
 });
+describe("Others methods /api/v1/migrations", () => {
+  describe("Anonymous user", () => {
+    test("rejects unsupported HTTP methods with 405", async () => {
+      expect.hasAssertions();
 
-test("POST /api/v1/migrations rejects unsupported HTTP methods with 405", async () => {
-  expect.hasAssertions();
+      for (const method of UNSUPPORTED_METHODS) {
+        const { response, responseBody } =
+          await fetchWithUnsupportedMethod(method);
 
-  for (const method of UNSUPPORTED_METHODS) {
-    const { response, responseBody } = await fetchWithUnsupportedMethod(method);
-
-    expectMethodNotAllowedJsonResponse(response);
-    expectAllowedMethodsHeader(response);
-    expectMethodNotAllowedErrorBody(responseBody, method);
-  }
+        expectMethodNotAllowedJsonResponse(response);
+        expectAllowedMethodsHeader(response);
+        expectMethodNotAllowedErrorBody(responseBody, method);
+      }
+    });
+  });
 });

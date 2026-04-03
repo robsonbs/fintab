@@ -56,28 +56,31 @@ function expectSamePendingMigrations(firstMigrations, secondMigrations) {
 beforeEach(async () => {
   await orchestrator.clearDatabase();
 });
+describe("GET /api/v1/migrations", () => {
+  describe("Anonymous user", () => {
+    test("returns the list of pending migrations", async () => {
+      expect.hasAssertions();
 
-test("GET /api/v1/migrations returns the list of pending migrations", async () => {
-  expect.hasAssertions();
+      const { response, responseBody } = await fetchMigrations();
 
-  const { response, responseBody } = await fetchMigrations();
+      expectOkJsonResponse(response);
+      expectMigrationList(responseBody);
+    });
 
-  expectOkJsonResponse(response);
-  expectMigrationList(responseBody);
-});
+    test("is idempotent and returns the same pending migrations", async () => {
+      expect.hasAssertions();
 
-test("GET /api/v1/migrations is idempotent and returns the same pending migrations", async () => {
-  expect.hasAssertions();
+      const { response: firstResponse, responseBody: firstResponseBody } =
+        await fetchMigrations();
 
-  const { response: firstResponse, responseBody: firstResponseBody } =
-    await fetchMigrations();
+      const { response: secondResponse, responseBody: secondResponseBody } =
+        await fetchMigrations();
 
-  const { response: secondResponse, responseBody: secondResponseBody } =
-    await fetchMigrations();
-
-  expectOkJsonResponse(firstResponse);
-  expectOkJsonResponse(secondResponse);
-  expectMigrationList(firstResponseBody);
-  expectMigrationList(secondResponseBody);
-  expectSamePendingMigrations(firstResponseBody, secondResponseBody);
+      expectOkJsonResponse(firstResponse);
+      expectOkJsonResponse(secondResponse);
+      expectMigrationList(firstResponseBody);
+      expectMigrationList(secondResponseBody);
+      expectSamePendingMigrations(firstResponseBody, secondResponseBody);
+    });
+  });
 });

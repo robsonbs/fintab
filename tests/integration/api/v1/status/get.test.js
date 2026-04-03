@@ -70,23 +70,27 @@ function expectValidDatabaseStatus(database) {
   expect(database.open_connections).toBeGreaterThanOrEqual(1);
 }
 
-test("GET /api/v1/status returns 200 with content-type JSON", async () => {
-  expect.hasAssertions();
+describe("GET /api/v1/status", () => {
+  describe("Anonymous user", () => {
+    test("returns status with content-type JSON", async () => {
+      expect.hasAssertions();
 
-  const { response } = await fetchStatus();
+      const { response } = await fetchStatus();
 
-  expectOkJsonResponse(response);
-});
+      expectOkJsonResponse(response);
+    });
 
-test("GET /api/v1/status returns valid database status fields", async () => {
-  expect.hasAssertions();
+    test("returns valid database status fields", async () => {
+      expect.hasAssertions();
 
-  const { response, responseBody } = await fetchStatus();
-  const { dependencies, updated_at: updatedAt } = responseBody;
-  const { database } = dependencies;
+      const { response, responseBody } = await fetchStatus();
+      const { dependencies, updated_at: updatedAt } = responseBody;
+      const { database } = dependencies;
 
-  expectOkJsonResponse(response);
-  expectStatusPayload(responseBody);
-  expectValidIsoDate(updatedAt);
-  expectValidDatabaseStatus(database);
+      expectOkJsonResponse(response);
+      expectStatusPayload(responseBody);
+      expectValidIsoDate(updatedAt);
+      expectValidDatabaseStatus(database);
+    });
+  });
 });

@@ -52,18 +52,25 @@ beforeEach(async () => {
   await orchestrator.clearDatabase();
 });
 
-test("POST /api/v1/migrations applies pending migrations and then returns an empty list on repeat", async () => {
-  expect.hasAssertions();
+describe("POST /api/v1/migrations", () => {
+  describe("Anonymous user", () => {
+    test("applies pending migrations and returns them in the response", async () => {
+      expect.hasAssertions();
 
-  const { response: firstResponse, responseBody: firstResponseBody } =
-    await postMigrations();
+      const { response, responseBody } = await postMigrations();
 
-  expectJsonResponse(firstResponse, 201);
-  expectMigrationList(firstResponseBody);
+      expectJsonResponse(response, 201);
+      expectMigrationList(responseBody);
+    });
 
-  const { response: secondResponse, responseBody: secondResponseBody } =
-    await postMigrations();
+    test("returns an empty list on repeat call with no new migrations", async () => {
+      expect.hasAssertions();
 
-  expectJsonResponse(secondResponse, 200);
-  expectEmptyMigrationList(secondResponseBody);
+      await postMigrations(); // Aplica as migrations pendentes na primeira chamada.
+      const { response, responseBody } = await postMigrations(); // Segunda chamada sem novas migrations.
+
+      expectJsonResponse(response, 200);
+      expectEmptyMigrationList(responseBody);
+    });
+  });
 });
