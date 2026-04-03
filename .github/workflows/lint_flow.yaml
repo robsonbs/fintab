@@ -18,6 +18,8 @@ on:
       - "**/*.md"
       - ".prettierrc*"
       - ".commitlintrc*"
+      - "commitlint.config.*"
+      - ".secretlintrc*"
       - "eslint.config.*"
       - "package.json"
       - "package-lock.json"
@@ -95,10 +97,10 @@ jobs:
 
   # Job dedicado para validar convencao de mensagens de commit no PR.
   commitlint:
-    name: commitlint
+    name: Commitlint
     runs-on: ubuntu-latest
-    # Evita consumo de runner enquanto o PR ainda estiver em modo draft.
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    # Este job depende dos dados de PR (base/head), por isso roda apenas em pull_request.
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
     timeout-minutes: 15
 
     steps:
@@ -113,6 +115,40 @@ jobs:
           cache: "npm"
           cache-dependency-path: "package-lock.json"
 
+      # Instala dependencias de forma reproduzivel com base no lockfile.
       - run: npm ci --no-audit --no-fund
 
-      - run: npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
+      # Usa o range base..head do PR para evitar falhas com historico reescrito/rebase.
+      - run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+  # Job dedicado para validacao de possiveis segredos versionados no repositorio.
+  secretlint:
+    name: Secretlint
+    runs-on: ubuntu-latest
+    # Evita consumo de runner enquanto o PR ainda estiver em modo draft.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    timeout-minutes: 15
+
+    steps:
+      # Passo 1: Checkout do código
+      # Faz o checkout do repositório para a máquina virtual.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Passo 2: Configuração do Node.js
+      # Configura o Node.js na versão especificada.
+      - uses: actions/setup-node@v4
+        with:
+          # Usa a mesma versao do Node definida no projeto.
+          node-version-file: "package.json"
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
+
+      # Passo 3: Instalação das dependências
+      # Instala as dependências do projeto utilizando o npm.
+      - run: npm ci --no-audit --no-fund
+
+      # Passo 4: Verificação de segredos
+      # Executa o comando para verificar se há segredos expostos no código utilizando o Secretlint.
+      - name: Validate repository about secrets leak with secretlint
+        run: npm run lint:secretlint:check
