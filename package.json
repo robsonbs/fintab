@@ -7,8 +7,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "npm run services:up && npm run services:wait:database && npm run migrations:up && (trap 'npm run postdev' INT TERM ; next dev)",
+    "lint:check": "npm run lint:eslint:check && npm run lint:prettier:check",
     "lint:eslint:check": "eslint .",
     "lint:eslint:fix": "eslint --fix .",
+    "lint:fix": "npm run lint:eslint:fix && npm run lint:prettier:fix",
     "lint:prettier:check": "prettier --check .",
     "lint:prettier:fix": "prettier --write .",
     "migrations:create": "node-pg-migrate -m infra/migrations create",
