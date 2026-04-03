@@ -1,8 +1,50 @@
 services:
+  # Banco PostgreSQL utilizado pelos ambientes de desenvolvimento e testes locais.
   database:
     container_name: "postgres-dev"
     image: "postgres:16.0-alpine3.18"
+    # Impede escalacao de privilegios por processos dentro do container.
+    security_opt:
+      - no-new-privileges:true
+    # Melhora tratamento de sinais e encerramento de processos no container.
+    init: true
+    restart: unless-stopped
+    # Define janela para encerramento gracioso antes de forcar kill.
+    stop_grace_period: 10s
     env_file:
       - ../.env.development
     ports:
-      - "5432:5432"
+      # Limita a exposicao da porta ao host local para reduzir superficie de ataque.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # Persiste os dados do Postgres para evitar perda entre reinicios do container.
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Garante um sinal claro de prontidao para scripts/orquestradores que dependem do banco.
+      # Usa fallback para evitar falso negativo caso variaveis nao estejam definidas no env_file.
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-postgres} --host=127.0.0.1 -p 5432 || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    logging:
+      # Evita crescimento indefinido de logs locais do container.
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      # Rede dedicada para facilitar expansao futura com outros servicos.
+      - app_net
+
+volumes:
+  # Volume nomeado para dados persistentes do Postgres.
+  postgres_data:
+
+networks:
+  # Rede interna da stack local.
+  app_net:
