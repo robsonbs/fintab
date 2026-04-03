@@ -30,13 +30,15 @@ jobs:
   test:
     name: Jest Ubuntu
     runs-on: ubuntu-latest
-    # Evita consumo de runner enquanto o PR ainda estiver em modo draft.
-    if: ${{ github.event.pull_request.draft == false }}
+    # Evita consumo de runner em PR draft, mas permite execucao manual via workflow_dispatch.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
     timeout-minutes: 20
 
     env:
       # Sinaliza ambiente de CI para ferramentas e logs mais previsiveis.
       CI: true
+      # Garante comportamento consistente de ambiente para a aplicacao em testes.
+      NODE_ENV: test
       # Evita ruido de telemetria durante execucao no GitHub Actions.
       NEXT_TELEMETRY_DISABLED: 1
 
