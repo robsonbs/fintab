@@ -1,8 +1,8 @@
 import database from "infra/database";
 import { runner as migrationRunner } from "node-pg-migrate";
-import { join } from "node:path";
+import { resolve } from "node:path";
 
-const MIGRATIONS_DIR = join("infra", "migrations");
+const MIGRATIONS_DIR = resolve("infra", "migrations");
 const MIGRATIONS_TABLE = "pgmigrations";
 
 function buildMigrationsOptions({ dbClient, dryRun }) {
