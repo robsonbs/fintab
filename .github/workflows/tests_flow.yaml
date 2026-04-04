@@ -37,8 +37,6 @@ jobs:
     env:
       # Sinaliza ambiente de CI para ferramentas e logs mais previsiveis.
       CI: true
-      # Garante comportamento consistente de ambiente para a aplicacao em testes.
-      NODE_ENV: test
       # Evita ruido de telemetria durante execucao no GitHub Actions.
       NEXT_TELEMETRY_DISABLED: 1
 
