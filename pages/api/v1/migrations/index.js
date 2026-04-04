@@ -1,19 +1,21 @@
 import { createRouter } from "next-connect";
-import { runMigrations } from "infra/migration";
-import controller from "infra/controller";
+import migrator from "models/migrator.js";
+import controller from "infra/controller.js";
 const router = createRouter();
 
-router.get(handleGet);
-router.post(handlePost);
+router.get(getHandler);
+router.post(postHandler);
 
 export default router.handler(controller.errorHandlers);
 
-async function handleGet(_, response) {
-  const migrations = await runMigrations({ dryRun: true });
-  return response.status(200).json(migrations);
+async function getHandler(_, response) {
+  const pendingMigrations = await migrator.listPendingMigrations();
+  return response.status(200).json(pendingMigrations);
 }
 
-async function handlePost(_, response) {
-  const migrations = await runMigrations({ dryRun: false });
-  return response.status(migrations.length > 0 ? 201 : 200).json(migrations);
+async function postHandler(_, response) {
+  const migratedMigrations = await migrator.runPendingMigrations();
+  return response
+    .status(migratedMigrations.length > 0 ? 201 : 200)
+    .json(migratedMigrations);
 }
