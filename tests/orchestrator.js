@@ -1,5 +1,6 @@
 import retry from "async-retry";
-import database from "infra/database";
+import database from "infra/database.js";
+import migrator from "models/migrator.js";
 
 const STATUS_API_URL = "http://localhost:3000/api/v1/status";
 const CLEAR_DATABASE_QUERY =
@@ -51,7 +52,12 @@ async function clearDatabase() {
   });
 }
 
+async function runPendingMigrations() {
+  return await migrator.runPendingMigrations();
+}
+
 export default {
   waitForAllServices,
   clearDatabase,
+  runPendingMigrations,
 };
