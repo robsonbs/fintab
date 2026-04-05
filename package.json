@@ -11,7 +11,7 @@
     "lint:check": "npm run lint:eslint:check && npm run lint:prettier:check",
     "lint:eslint:check": "eslint .",
     "lint:eslint:fix": "eslint --fix .",
-    "lint:fix": "npm run lint:eslint:fix && npm run lint:prettier:fix",
+    "lint:fix": "npm run lint:prettier:fix ;npm run lint:eslint:fix",
     "lint:prettier:check": "prettier --check .",
     "lint:prettier:fix": "prettier --write .",
     "lint:secretlint:check": "npx secretlint --maskSecrets '**/*'",
@@ -63,7 +63,9 @@
     "husky": "9.1.7",
     "jest": "30.3.0",
     "prettier": "3.8.1",
-    "secretlint": "11.4.1"
+    "secretlint": "11.4.1",
+    "set-cookie-parser": "2.7.1",
+    "uuid": "11.1.0"
   },
   "config": {
     "commitizen": {
