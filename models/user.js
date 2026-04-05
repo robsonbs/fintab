@@ -1,5 +1,5 @@
 import database from "infra/database.js";
-import { ValidationError } from "infra/errors.js";
+import { ValidationError, NotFoundError } from "infra/errors.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -184,6 +184,12 @@ async function findOneById(id) {
     ;`,
       values: [subject],
     });
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        message: `O ${field} informado não foi encontrado no sistema.`,
+        action: `Verifique se o ${field} foi digitado corretamente.`,
+      });
+    }
     return results.rows[0];
   }
 }
@@ -202,6 +208,12 @@ async function runSelectQuery(subject, field = "username") {
     ;`,
     values: [subject],
   });
+  if (results.rowCount === 0) {
+    throw new NotFoundError({
+      message: `O ${field} informado não foi encontrado no sistema.`,
+      action: `Verifique se o ${field} foi digitado corretamente.`,
+    });
+  }
   return results.rows[0];
 }
 
