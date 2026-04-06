@@ -28,7 +28,7 @@
     "services:up": "docker compose -f infra/compose.yaml up -d",
     "services:wait:database": "node infra/scripts/wait-for-postgres.js",
     "test:watch": "jest --watchAll --runInBand --verbose",
-    "test": "npm run services:up && concurrently --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose\""
+    "test": "npm run services:up && concurrently --passthrough-arguments --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose {@}\""
   },
   "engines": {
     "node": "24"
