@@ -5,6 +5,8 @@ import user from "models/user";
 const router = createRouter();
 
 router.get(getHandler);
+router.patch(patchHandler);
+
 export default router.handler(controller.errorHandlers);
 
 async function getHandler(request, response) {
@@ -12,4 +14,10 @@ async function getHandler(request, response) {
   const userFound = await user.findOneByUsername(username);
   console.log("User found:", userFound);
   return response.status(200).json(userFound);
+}
+
+async function patchHandler(request, response) {
+  const { username } = request.query;
+  const updatedUser = await user.update(username, request.body);
+  return response.status(200).json(updatedUser);
 }

@@ -31,7 +31,8 @@ async function update(username, userInputValues) {
     await validateAndHashPassword(userInputValues);
   }
 
-  return await runUpdateQuery(username, userInputValues);
+  const userWithUpdates = { ...currentUser, ...userInputValues };
+  return await runUpdateQuery(userWithUpdates);
 }
 
 function validatePayload(userInputValues) {
@@ -64,7 +65,7 @@ async function validateUsername(newUsername, currentUsername) {
     });
   }
 
-  if (!/^[a-zA-Z0-9_-]+$/.test(newUsername)) {
+  if (!/^[a-zA-Z0-9_]+$/.test(newUsername)) {
     throw new ValidationError({
       message: "O username contém caracteres inválidos.",
       action:
@@ -130,12 +131,7 @@ async function runInsertQuery(userInputValues) {
   return results.rows[0];
 }
 
-async function runUpdateQuery(username, userInputValues) {
-  const {
-    username: newUsername,
-    email: newEmail,
-    password: newPassword,
-  } = userInputValues;
+async function runUpdateQuery(userWithNewValues) {
   const results = await database.query({
     text: `
     UPDATE users
@@ -145,10 +141,15 @@ async function runUpdateQuery(username, userInputValues) {
       password = COALESCE($3, password),
       updated_at = timezone('utc', now())
     WHERE
-      LOWER(username) = LOWER($4)
+      id = $4
     RETURNING *;
     `,
-    values: [newUsername, newEmail, newPassword, username],
+    values: [
+      userWithNewValues.username,
+      userWithNewValues.email,
+      userWithNewValues.password,
+      userWithNewValues.id,
+    ],
   });
   return results.rows[0];
 }
