@@ -45,6 +45,16 @@ exports.up = (pgm) => {
       default: pgm.func("timezone('utc', now())"),
     },
   });
+
+  // Otimiza buscas de sessoes ativas por usuario (filtro por usuario + expiracao).
+  pgm.createIndex("sessions", ["user_id", "expires_at"], {
+    name: "sessions_user_id_expires_at_idx",
+  });
+
+  // Otimiza varreduras por expiracao (ex.: limpeza de sessoes expiradas).
+  pgm.createIndex("sessions", "expires_at", {
+    name: "sessions_expires_at_idx",
+  });
 };
 
 /**
