@@ -1,4 +1,5 @@
 import database from "infra/database.js";
+import password from "models/password.js";
 import { ValidationError, NotFoundError } from "infra/errors.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -7,6 +8,7 @@ async function create(userInputValues) {
   const { username, email } = userInputValues;
   await validateUniqueUsername(username);
   await validateUniqueEmail(email);
+  await validateAndHashPassword(userInputValues);
 
   const newUser = await runInsertQuery(userInputValues);
   return newUser;
@@ -23,6 +25,10 @@ async function update(username, userInputValues) {
 
   if ("email" in userInputValues) {
     await validateEmail(userInputValues.email);
+  }
+
+  if ("password" in userInputValues) {
+    await validateAndHashPassword(userInputValues);
   }
 
   return await runUpdateQuery(username, userInputValues);
@@ -89,6 +95,23 @@ async function validateEmail(email) {
   }
 
   await validateUniqueEmail(email);
+}
+
+async function validateAndHashPassword(userInputValues) {
+  if (userInputValues.password == null) {
+    // Checks for both null and undefined
+    throw new ValidationError({
+      message: "A senha não pode ser nula.",
+      action: "Informe uma senha válida.",
+    });
+  }
+  validatePassword(userInputValues.password);
+  await hashPasswordInObject(userInputValues);
+}
+
+async function hashPasswordInObject(userInputValues) {
+  const hashedPassword = await password.hash(userInputValues.password);
+  userInputValues.password = hashedPassword;
 }
 
 async function runInsertQuery(userInputValues) {
@@ -215,6 +238,15 @@ async function runSelectQuery(subject, field = "username") {
     });
   }
   return results.rows[0];
+}
+
+function validatePassword(password) {
+  if (password.length < 8) {
+    throw new ValidationError({
+      message: "A senha deve ter pelo menos 8 caracteres.",
+      action: "Informe uma senha válida com 8 ou mais caracteres.",
+    });
+  }
 }
 
 export default {
