@@ -2,7 +2,7 @@ import database from "infra/database.js";
 import { runner as migrationRunner } from "node-pg-migrate";
 import { resolve } from "node:path";
 
-const MIGRATIONS_DIR = resolve("infra", "migrations");
+const MIGRATIONS_DIR = resolve(process.cwd(), "infra", "migrations");
 const MIGRATIONS_TABLE = "pgmigrations";
 
 // Monta as opcoes padrao para execucao das migrations com o cliente de banco.
