@@ -13,20 +13,9 @@ beforeEach(async () => {
 describe("GET /api/v1/users/[username]", () => {
   describe("Anonymous user", () => {
     test("With exactly matching username", async () => {
-      const createResponse = await fetch("http://localhost:3000/api/v1/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "robsonBS",
-          email: "robsonbs@example.com",
-          password: "password123",
-        }),
+      const createdUser = await orchestrator.createUser({
+        username: "robsonBS",
       });
-      expect(createResponse.status).toEqual(201);
-      const createdUser = await createResponse.json();
-
       const response = await fetch(
         `http://localhost:3000/api/v1/users/${createdUser.username}`,
       );
@@ -36,7 +25,7 @@ describe("GET /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: createdUser.id,
         username: "robsonBS",
-        email: "robsonbs@example.com",
+        email: createdUser.email,
         password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -47,19 +36,9 @@ describe("GET /api/v1/users/[username]", () => {
     });
 
     test("With non-exact matching username", async () => {
-      const createResponse = await fetch("http://localhost:3000/api/v1/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "robsonBS",
-          email: "robsonbs@example.com",
-          password: "password123",
-        }),
+      const createdUser = await orchestrator.createUser({
+        username: "robsonBS",
       });
-      expect(createResponse.status).toEqual(201);
-      const createdUser = await createResponse.json();
 
       const response = await fetch(
         `http://localhost:3000/api/v1/users/${createdUser.username.toLowerCase()}`,
@@ -69,7 +48,7 @@ describe("GET /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: createdUser.id,
         username: "robsonBS",
-        email: "robsonbs@example.com",
+        email: createdUser.email,
         password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -80,19 +59,9 @@ describe("GET /api/v1/users/[username]", () => {
     });
 
     test("Should return user data", async () => {
-      const createResponse = await fetch("http://localhost:3000/api/v1/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "robsonbs",
-          email: "robsonbs@example.com",
-          password: "password123",
-        }),
+      const createdUser = await orchestrator.createUser({
+        username: "robsonbs",
       });
-      expect(createResponse.status).toEqual(201);
-      const createdUser = await createResponse.json();
 
       const response = await fetch(
         `http://localhost:3000/api/v1/users/${createdUser.username}`,
@@ -102,7 +71,7 @@ describe("GET /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: createdUser.id,
         username: "robsonbs",
-        email: "robsonbs@example.com",
+        email: createdUser.email,
         password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,

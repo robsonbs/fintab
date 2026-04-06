@@ -1,6 +1,8 @@
+import { faker } from "@faker-js/faker/locale/pt_BR";
 import retry from "async-retry";
 import database from "infra/database.js";
 import migrator from "models/migrator.js";
+import user from "models/user.js";
 
 const STATUS_API_URL = "http://localhost:3000/api/v1/status";
 const CLEAR_DATABASE_QUERY =
@@ -56,8 +58,18 @@ async function runPendingMigrations() {
   return await migrator.runPendingMigrations();
 }
 
+async function createUser(userObject) {
+  return await user.create({
+    username:
+      userObject?.username || faker.internet.username().replace(/[_.-]/g, ""),
+    email: userObject?.email || faker.internet.email(),
+    password: userObject?.password || "validpassword",
+  });
+}
+
 export default {
   waitForAllServices,
   clearDatabase,
   runPendingMigrations,
+  createUser,
 };
