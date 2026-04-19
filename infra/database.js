@@ -1,5 +1,5 @@
 import { Client } from "pg";
-import { ServiceError } from "./errors";
+import { ServiceError } from "./errors.js";
 
 async function query(queryObject) {
   let client;

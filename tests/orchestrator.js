@@ -3,6 +3,7 @@ import retry from "async-retry";
 import database from "infra/database.js";
 import migrator from "models/migrator.js";
 import user from "models/user.js";
+import session from "models/session.js";
 
 const STATUS_API_URL = "http://localhost:3000/api/v1/status";
 const CLEAR_DATABASE_QUERY =
@@ -67,9 +68,14 @@ async function createUser(userObject) {
   });
 }
 
+async function createSessionForUser(userId) {
+  return await session.create(userId);
+}
+
 export default {
   waitForAllServices,
   clearDatabase,
   runPendingMigrations,
   createUser,
+  createSessionForUser,
 };
