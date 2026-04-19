@@ -40,6 +40,30 @@ services:
     networks:
       # Rede dedicada para facilitar expansao futura com outros servicos.
       - app_net
+  mailcatcher:
+    container_name: "mailcatcher-dev"
+    image: "sj26/mailcatcher@sha256:5d153a4daadf0c266f29c3856085741f06ca1e3768671f4267622d3e3ffe5564"
+    restart: unless-stopped
+    ports:
+      # Limita a exposicao das portas ao host local para reduzir superficie de ataque.
+      - "127.0.0.1:1080:1080"
+      - "127.0.0.1:1025:1025"
+    healthcheck:
+      # Verifica se o serviço de captura de emails está respondendo corretamente.
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:1080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging:
+      # Evita crescimento indefinido de logs locais do container.
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      # Rede dedicada para facilitar expansao futura com outros servicos.
+      - app_net
 
 volumes:
   # Volume nomeado para dados persistentes do Postgres.
