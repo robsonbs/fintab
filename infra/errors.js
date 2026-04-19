@@ -115,3 +115,22 @@ export class UnauthorizedError extends Error {
     };
   }
 }
+export class TooManyRequestsError extends Error {
+  constructor({ message, action, cause }) {
+    super(message || "Número de tentativas excedido.", {
+      cause,
+    });
+    this.action = action || "Aguarde alguns minutos antes de tentar novamente.";
+    this.name = "TooManyRequestsError";
+    this.statusCode = 429;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}

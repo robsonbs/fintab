@@ -6,6 +6,7 @@ import {
   NotFoundError,
   ValidationError,
   UnauthorizedError,
+  TooManyRequestsError,
 } from "./errors.js";
 
 function onNoMatchHandler(request, response) {
@@ -19,7 +20,11 @@ function onErrorHandler(error, request, response) {
     return response.status(error.statusCode).json(error);
   }
 
-  if (error instanceof UnauthorizedError) {
+  if (
+    error instanceof UnauthorizedError ||
+    error instanceof TooManyRequestsError
+  ) {
+    clearSessionCookie(response);
     return response.status(error.statusCode).json(error);
   }
 
@@ -42,10 +47,22 @@ function setSessionCookie(response, token) {
   response.setHeader("Set-Cookie", setCookie);
 }
 
+function clearSessionCookie(response) {
+  const setCookie = cookie.serialize("session_id", "invalid", {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: -1,
+  });
+  response.setHeader("Set-Cookie", setCookie);
+}
+
 export default {
   errorHandlers: {
     onNoMatch: onNoMatchHandler,
     onError: onErrorHandler,
   },
   setSessionCookie,
+  clearSessionCookie,
 };

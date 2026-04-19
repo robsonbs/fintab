@@ -1,11 +1,11 @@
-import { Client } from "pg";
+import { Client, Pool } from "pg";
 import { ServiceError } from "./errors.js";
 
+let pool;
+
 async function query(queryObject) {
-  let client;
   try {
-    client = await getClient();
-    const result = await client.query(queryObject);
+    const result = await getPool().query(queryObject);
     return result;
   } catch (error) {
     const serviceErrorObject = new ServiceError({
@@ -14,9 +14,25 @@ async function query(queryObject) {
     });
     console.error("Database query error:", serviceErrorObject);
     throw serviceErrorObject;
-  } finally {
-    await client?.end();
   }
+}
+
+function getPool() {
+  if (pool) {
+    return pool;
+  }
+
+  pool = new Pool({
+    host: process.env.POSTGRES_HOST,
+    port: process.env.POSTGRES_PORT,
+    user: process.env.POSTGRES_USER,
+    database: process.env.POSTGRES_DB,
+    password: process.env.POSTGRES_PASSWORD,
+    ssl: getSSLValues(),
+    max: 10,
+  });
+
+  return pool;
 }
 
 async function getClient() {
