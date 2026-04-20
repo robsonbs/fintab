@@ -135,6 +135,21 @@ async function runInsertQuery(userInputValues) {
   return results.rows[0];
 }
 
+async function setFeatures(userId, features) {
+  const results = await database.query({
+    text: `
+    UPDATE users
+    SET
+      features = $1,
+      updated_at = timezone('utc', now())
+    WHERE
+      id = $2
+    RETURNING *;
+    `,
+    values: [features, userId],
+  });
+  return results.rows[0];
+}
 async function runUpdateQuery(userWithNewValues) {
   const results = await database.query({
     text: `
@@ -260,4 +275,5 @@ export default {
   findOneByEmail,
   findOneById,
   update,
+  setFeatures,
 };

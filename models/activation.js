@@ -1,10 +1,12 @@
 import email from "infra/email.js";
 import database from "infra/database.js";
 import webserver from "infra/webserver.js";
+import user from "models/user.js";
+import { NotFoundError } from "infra/errors.js";
 
 const EXPIRATION_TIME_MINUTES = 15 * 60 * 1000; // 15 minutos em milissegundos
 
-async function findOneValidById(id) {
+async function findOneValidById(activationTokenId) {
   const query = {
     text: `
       SELECT
@@ -19,11 +21,49 @@ async function findOneValidById(id) {
         created_at DESC
       LIMIT 1
     ;`,
-    values: [id],
+    values: [activationTokenId],
   };
 
   const { rows } = await database.query(query);
+
+  if (rows.length === 0) {
+    throw new NotFoundError("Activation token not found or invalid");
+  }
+
   return rows[0];
+}
+
+async function markTokenAsUsed(activationTokenId) {
+  const query = {
+    text: `
+      UPDATE
+        user_activation_tokens
+      SET
+        used_at = timezone('utc', now()),
+        updated_at = timezone('utc', now())
+      WHERE
+        id = $1
+        AND used_at IS NULL
+        AND expires_at > timezone('utc', now())
+      RETURNING
+        *
+    ;`,
+    values: [activationTokenId],
+  };
+
+  const { rows } = await database.query(query);
+  if (rows.length === 0) {
+    throw new NotFoundError("Activation token not found or invalid");
+  }
+  return rows[0];
+}
+
+async function activateUserByUserId(userId) {
+  const userFound = await user.findOneById(userId);
+  if (!userFound) {
+    throw new NotFoundError("User not found");
+  }
+  return await user.setFeatures(userId, ["read:session", "create:session"]);
 }
 
 async function create(userId) {
@@ -64,4 +104,10 @@ async function sendEmailToUser(user, activationToken) {
   });
 }
 
-export default { create, sendEmailToUser, findOneValidById };
+export default {
+  create,
+  sendEmailToUser,
+  findOneValidById,
+  markTokenAsUsed,
+  activateUserByUserId,
+};
