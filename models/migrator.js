@@ -8,7 +8,6 @@ const MIGRATIONS_TABLE = "pgmigrations";
 // Monta as opcoes padrao para execucao das migrations com o cliente de banco.
 function buildMigrationsOptions({ dbClient, dryRun }) {
   return {
-    databaseUrl: process.env.DATABASE_URL,
     dir: MIGRATIONS_DIR,
     dryRun,
     direction: "up",
