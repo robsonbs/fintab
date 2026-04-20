@@ -1,3 +1,5 @@
+import webserver from "infra/webserver";
+import activation from "models/activation.js";
 import orchestrator from "tests/orchestrator.js";
 
 beforeAll(async () => {
@@ -8,6 +10,7 @@ beforeAll(async () => {
 });
 
 describe("Use case: Registration flow (all successful)", () => {
+  let createUserResponseBody;
   test("Create user account", async () => {
     const createUserResponse = await fetch(
       "http://localhost:3000/api/v1/users",
@@ -25,7 +28,7 @@ describe("Use case: Registration flow (all successful)", () => {
     );
     expect(createUserResponse.status).toBe(201);
 
-    const createUserResponseBody = await createUserResponse.json();
+    createUserResponseBody = await createUserResponse.json();
     expect(createUserResponseBody).toEqual({
       id: createUserResponseBody.id,
       username: "newuser",
@@ -37,9 +40,25 @@ describe("Use case: Registration flow (all successful)", () => {
     });
   });
 
-  test.skip("Receive activation email", async () => {
+  test("Receive activation email", async () => {
     const lastEmail = await orchestrator.getLastEmail();
-    expect(lastEmail.sender).toBe("<activation@example.com>");
+    const activationToken = await orchestrator.extractUUIDFromEmailText(
+      lastEmail.text,
+    );
+
+    expect(lastEmail.text).toContain(
+      `${webserver.origin}/singup/activate/${activationToken}`,
+    );
+
+    const activationTokenObject =
+      await activation.findOneValidById(activationToken);
+    expect(activationTokenObject.user_id).toBe(createUserResponseBody.id);
+    expect(activationTokenObject.used_at).toBeNull();
+
+    expect(lastEmail.sender).toBe("<contato@robsonsouza.dev.br>");
+    expect(lastEmail.recipients[0]).toBe("<newuser@example.com>");
+    expect(lastEmail.subject).toBe("Ative seu cadastro no Robson Souza Dev!");
+    expect(lastEmail.text).toContain("newuser");
   });
   test.todo("Activate account using the link received in the email");
   test.todo("Login with the activated account");
