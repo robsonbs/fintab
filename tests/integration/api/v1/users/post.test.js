@@ -130,4 +130,35 @@ describe("POST /api/v1/users", () => {
       expect(responseBody.status_code).toEqual(400);
     });
   });
+
+  describe("Default user", () => {
+    test("With unique and valid data", async () => {
+      const user1 = await orchestrator.createUser();
+      await orchestrator.activateUser(user1);
+      const user1SessionObject = await orchestrator.createSessionForUser(
+        user1.id,
+      );
+
+      const response = await fetch("http://localhost:3000/api/v1/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `session_id=${user1SessionObject.token}`,
+        },
+        body: JSON.stringify({
+          username: "robsonbs",
+          email: "contato4@robsonsouza.dev.br",
+          password: "senha123",
+        }),
+      });
+      expect(response.status).toEqual(403);
+      const responseBody = await response.json();
+      expect(responseBody).toEqual({
+        action: 'Verifique se o seu usuário possui a feature "create:user"',
+        message: "Você não tem permissão para acessar este recurso.",
+        name: "ForbiddenError",
+        status_code: 403,
+      });
+    });
+  });
 });
