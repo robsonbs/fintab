@@ -130,6 +130,11 @@ async function extractUUIDFromEmailText(emailText) {
   return match ? match[0] : null;
 }
 
+async function addFeaturesToUser(userObject, features) {
+  const updatedUser = await user.addFeatures(userObject.id, features);
+  return updatedUser;
+}
+
 export default {
   waitForAllServices,
   clearDatabase,
@@ -140,4 +145,5 @@ export default {
   deleteAllEmails,
   getLastEmail,
   extractUUIDFromEmailText,
+  addFeaturesToUser,
 };

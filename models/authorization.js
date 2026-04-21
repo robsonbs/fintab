@@ -7,7 +7,10 @@ function canPerformAction(user, requiredFeature, resource) {
 
   if (requiredFeature === "update:user" && resource) {
     authorized = false;
-    if (user.id === resource.id) {
+    if (
+      user.id === resource.id ||
+      canPerformAction(user, "update:user:others", resource)
+    ) {
       authorized = true;
     }
   }

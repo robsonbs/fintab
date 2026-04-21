@@ -1,3 +1,4 @@
+import { version as uuidVersion } from "uuid";
 import activation from "models/activation.js";
 import password from "models/password.js";
 import orchestrator from "tests/orchestrator.js";
@@ -414,6 +415,57 @@ describe("PATCH /api/v1/users/[username]", () => {
         name: "ValidationError",
         status_code: 400,
       });
+    });
+  });
+
+  describe("Privileged user", () => {
+    test("with `update:user:others` targeting `defaultUser`", async () => {
+      const privilegedUser = await orchestrator.createUser();
+
+      const activatedPrivilegedUser = await activation.activateUserByUserId(
+        privilegedUser.id,
+      );
+
+      await orchestrator.addFeaturesToUser(activatedPrivilegedUser, [
+        "update:user:others",
+      ]);
+
+      const privilegedSessionObject = await orchestrator.createSessionForUser(
+        activatedPrivilegedUser.id,
+      );
+
+      const defaultUser = await orchestrator.createUser();
+
+      const response = await fetch(
+        `http://localhost:3000/api/v1/users/${defaultUser.username}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `session_id=${privilegedSessionObject.token}`,
+          },
+          body: JSON.stringify({
+            username: "alteracaoPeloPrivilegiado",
+          }),
+        },
+      );
+      expect(response.status).toEqual(200);
+      const responseBody = await response.json();
+
+      expect(responseBody).toEqual({
+        id: defaultUser.id,
+        username: "alteracaoPeloPrivilegiado",
+        email: defaultUser.email,
+        features: defaultUser.features,
+        password: defaultUser.password,
+        created_at: responseBody.created_at,
+        updated_at: responseBody.updated_at,
+      });
+      expect(uuidVersion(responseBody.id)).toEqual(4);
+      expect(responseBody.password).toEqual(responseBody.password);
+      expect(Date.parse(responseBody.created_at)).not.toBeNaN();
+      expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
+      expect(responseBody.updated_at > responseBody.created_at).toEqual(true);
     });
   });
 });
