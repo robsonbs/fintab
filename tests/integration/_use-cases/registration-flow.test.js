@@ -80,7 +80,22 @@ describe("Use case: Registration flow (all successful)", () => {
     );
     expect(activatedUser.features).toEqual(["read:session", "create:session"]);
   });
-  test.todo("Login with the activated account");
+  test("Login with the activated account", async () => {
+    const loginResponse = await fetch("http://localhost:3000/api/v1/sessions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: "newuser@example.com",
+        password: "validpassword",
+      }),
+    });
+    expect(loginResponse.status).toBe(201);
+    const loginResponseBody = await loginResponse.json();
+    expect(loginResponseBody.user_id).toBe(createUserResponseBody.id);
+    expect(loginResponseBody.token).toBeDefined();
+  });
   test.todo(
     "Get the user profile information using the obtained session token",
   );

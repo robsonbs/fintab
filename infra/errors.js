@@ -134,3 +134,22 @@ export class TooManyRequestsError extends Error {
     };
   }
 }
+
+export class ForbiddenError extends Error {
+  constructor({ message, action }) {
+    super(message || "Acesso negado.");
+    this.action =
+      action || "Verifique as features necessárias antes de continuar.";
+    this.name = "ForbiddenError";
+    this.statusCode = 403;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}

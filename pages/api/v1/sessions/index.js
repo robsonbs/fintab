@@ -16,7 +16,8 @@ const failedAttemptsByKey = new Map();
 
 const router = createRouter();
 
-router.post(postHandler);
+router.use(controller.injectAnonymousOrUser);
+router.post(controller.canRequestMiddleware("create:session"), postHandler);
 router.delete(deleteHandler);
 
 export default router.handler(controller.errorHandlers);

@@ -7,7 +7,9 @@ import {
   ValidationError,
   UnauthorizedError,
   TooManyRequestsError,
+  ForbiddenError,
 } from "./errors.js";
+import user from "models/user.js";
 
 function onNoMatchHandler(request, response) {
   const publicErrorObject = new MethodNotAllowedError();
@@ -15,7 +17,11 @@ function onNoMatchHandler(request, response) {
 }
 
 function onErrorHandler(error, request, response) {
-  if (error instanceof ValidationError || error instanceof NotFoundError) {
+  if (
+    error instanceof ValidationError ||
+    error instanceof NotFoundError ||
+    error instanceof ForbiddenError
+  ) {
     console.log(error);
     return response.status(error.statusCode).json(error);
   }
@@ -58,6 +64,53 @@ function clearSessionCookie(response) {
   response.setHeader("Set-Cookie", setCookie);
 }
 
+async function injectAnonymousOrUser(request, response, next) {
+  const sessionId = request.cookies?.session_id;
+  if (!sessionId) {
+    injectAnonymous(request);
+    return next();
+  }
+
+  await injectAuthenticatedUser(request);
+
+  return next();
+}
+
+async function injectAuthenticatedUser(request) {
+  const sessionToken = request.cookies.session_id;
+  const sessionObject = await session.findOneValidByToken(sessionToken);
+  const userObject = await user.findOneById(sessionObject.user_id);
+  request.context = {
+    ...request.context,
+    user: userObject,
+  };
+}
+
+function injectAnonymous(request) {
+  const anonymousUserObject = {
+    features: ["read:activation_token", "create:session", "create:user"],
+  };
+
+  request.context = {
+    ...request.context,
+    user: anonymousUserObject,
+  };
+}
+
+function canRequestMiddleware(requiredFeature) {
+  return (request, _, next) => {
+    const userTryingFeatures = request.context?.user?.features || [];
+    if (!userTryingFeatures.includes(requiredFeature)) {
+      throw new ForbiddenError({
+        message: "Você não tem permissão para executar essa ação",
+        action: `Verifique se seu usuário tem a feature "${requiredFeature}" necessária para realizar essa ação.`,
+      });
+    }
+
+    return next();
+  };
+}
+
 export default {
   errorHandlers: {
     onNoMatch: onNoMatchHandler,
@@ -65,4 +118,6 @@ export default {
   },
   setSessionCookie,
   clearSessionCookie,
+  injectAnonymousOrUser,
+  canRequestMiddleware,
 };
