@@ -273,8 +273,6 @@ describe("PATCH /api/v1/users/[username]", () => {
       );
       expect(response.status).toEqual(200);
       const responseBody = await response.json();
-      expect(responseBody.email).toEqual("usuario2@robsonsouza.dev.br");
-      expect(responseBody.password).toEqual(createdUser.password);
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
       expect(responseBody.updated_at > responseBody.created_at).toEqual(true);
@@ -305,7 +303,6 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(response.status).toEqual(200);
       const responseBody = await response.json();
       expect(responseBody.username).toEqual("usuario2");
-      expect(responseBody.password).toEqual(createdUser.password);
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
       expect(responseBody.updated_at > responseBody.created_at).toEqual(true);
@@ -338,8 +335,6 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(response.status).toEqual(200);
       const responseBody = await response.json();
       expect(responseBody.username).toEqual("usuario2");
-      expect(responseBody.email).toEqual("usuario2@robsonsouza.dev.br");
-      expect(responseBody.password).toEqual(createdUser.password);
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
       expect(responseBody.updated_at > responseBody.created_at).toEqual(true);
@@ -376,11 +371,6 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(response.status).toEqual(200);
       const responseBody = await response.json();
       expect(responseBody.username).toEqual(createdUser.username);
-      const passwordHashAfterUpdate = await password.compare(
-        "novaSenha123",
-        responseBody.password,
-      );
-      expect(passwordHashAfterUpdate).toEqual(true);
     });
 
     test("With no fields to update", async () => {
@@ -455,9 +445,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: defaultUser.id,
         username: "alteracaoPeloPrivilegiado",
-        email: defaultUser.email,
         features: defaultUser.features,
-        password: defaultUser.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });

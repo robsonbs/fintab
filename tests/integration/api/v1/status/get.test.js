@@ -1,3 +1,4 @@
+import activation from "models/activation";
 import orchestrator from "tests/orchestrator";
 
 beforeAll(async () => {
@@ -5,13 +6,27 @@ beforeAll(async () => {
   await orchestrator.waitForAllServices();
 });
 
+beforeEach(async () => {
+  // Reseta o estado do banco antes de cada teste para garantir isolamento.
+  await orchestrator.runPendingMigrations();
+});
+
 const STATUS_API_URL = "http://localhost:3000/api/v1/status";
 
 // Busca o endpoint de status e retorna resposta + corpo JSON.
-async function fetchStatus() {
-  const response = await fetch(STATUS_API_URL);
-  const responseBody = await response.json();
+async function fetchStatus(sessionToken) {
+  if (!sessionToken) {
+    const response = await fetch(STATUS_API_URL);
+    const responseBody = await response.json();
 
+    return { response, responseBody };
+  }
+  const response = await fetch(STATUS_API_URL, {
+    headers: {
+      cookie: `session_id=${sessionToken}`,
+    },
+  });
+  const responseBody = await response.json();
   return { response, responseBody };
 }
 
@@ -53,7 +68,7 @@ function expectValidIsoDate(dateString) {
 }
 
 // Valida os campos principais de status do banco.
-function expectValidDatabaseStatus(database) {
+function expectValidDatabaseStatusAll(database) {
   expect(database).toEqual(
     expect.objectContaining({
       environment: expect.any(String),
@@ -70,6 +85,19 @@ function expectValidDatabaseStatus(database) {
   expect(database.open_connections).toBeGreaterThanOrEqual(1);
 }
 
+function expectValidDatabaseStatus(database) {
+  expect(database).toEqual(
+    expect.objectContaining({
+      max_connections: expect.any(Number),
+      open_connections: expect.any(Number),
+    }),
+  );
+
+  expect(database.max_connections).toBeGreaterThan(0);
+  expect(database.open_connections).toBeGreaterThanOrEqual(1);
+  expect(database).not.toHaveProperty("version");
+  expect(database).not.toHaveProperty("environment");
+}
 describe("GET /api/v1/status", () => {
   describe("Anonymous user", () => {
     test("returns status with content-type JSON", async () => {
@@ -91,6 +119,90 @@ describe("GET /api/v1/status", () => {
       expectStatusPayload(responseBody);
       expectValidIsoDate(updatedAt);
       expectValidDatabaseStatus(database);
+    });
+  });
+
+  describe("Default user", () => {
+    const createDefaultUserAndSession = async () => {
+      const defaultUser = await orchestrator.createUser();
+
+      const activatedDefaultUser = await activation.activateUserByUserId(
+        defaultUser.id,
+      );
+
+      const defaultSessionObject = await orchestrator.createSessionForUser(
+        activatedDefaultUser.id,
+      );
+
+      return { activatedDefaultUser, defaultSessionObject };
+    };
+
+    test("returns status with content-type JSON", async () => {
+      expect.hasAssertions();
+
+      const { defaultSessionObject: sessionObject } =
+        await createDefaultUserAndSession();
+      const { response } = await fetchStatus(sessionObject.token);
+
+      expectOkJsonResponse(response);
+    });
+
+    test("returns valid database status fields", async () => {
+      expect.hasAssertions();
+
+      const { defaultSessionObject: sessionObject } =
+        await createDefaultUserAndSession();
+      const { response, responseBody } = await fetchStatus(sessionObject.token);
+      const { dependencies, updated_at: updatedAt } = responseBody;
+      const { database } = dependencies;
+
+      expectOkJsonResponse(response);
+      expectStatusPayload(responseBody);
+      expectValidIsoDate(updatedAt);
+      expectValidDatabaseStatus(database);
+    });
+  });
+  describe("Privileged user", () => {
+    const createPrivilegedUserAndSession = async () => {
+      const privilegedUser = await orchestrator.createUser();
+
+      const activatedPrivilegedUser = await activation.activateUserByUserId(
+        privilegedUser.id,
+      );
+
+      await orchestrator.addFeaturesToUser(activatedPrivilegedUser, [
+        "read:status:all",
+      ]);
+      const privilegedSessionObject = await orchestrator.createSessionForUser(
+        activatedPrivilegedUser.id,
+      );
+
+      return { activatedPrivilegedUser, privilegedSessionObject };
+    };
+
+    test("returns status with content-type JSON", async () => {
+      expect.hasAssertions();
+
+      const { privilegedSessionObject: sessionObject } =
+        await createPrivilegedUserAndSession();
+      const { response } = await fetchStatus(sessionObject.token);
+
+      expectOkJsonResponse(response);
+    });
+
+    test("returns valid database status fields", async () => {
+      expect.hasAssertions();
+
+      const { privilegedSessionObject: sessionObject } =
+        await createPrivilegedUserAndSession();
+      const { response, responseBody } = await fetchStatus(sessionObject.token);
+      const { dependencies, updated_at: updatedAt } = responseBody;
+      const { database } = dependencies;
+
+      expectOkJsonResponse(response);
+      expectStatusPayload(responseBody);
+      expectValidIsoDate(updatedAt);
+      expectValidDatabaseStatusAll(database);
     });
   });
 });

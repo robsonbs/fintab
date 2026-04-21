@@ -34,12 +34,12 @@ async function postHandler(request, response) {
   const userInputValues = request.body;
 
   try {
-    const authenticateUser = await authentication.getAuthenticatedUser(
+    const authenticatedUser = await authentication.getAuthenticatedUser(
       userInputValues.email,
       userInputValues.password,
     );
 
-    if (!authorization.canPerformAction(authenticateUser, "create:session")) {
+    if (!authorization.canPerformAction(authenticatedUser, "create:session")) {
       throw new ForbiddenError({
         message: "Você não tem permissão para criar uma sessão",
         action:
@@ -49,11 +49,17 @@ async function postHandler(request, response) {
 
     clearFailedAttempts(rateLimitKey);
 
-    const newSession = await session.create(authenticateUser.id);
+    const newSession = await session.create(authenticatedUser.id);
 
     controller.setSessionCookie(response, newSession.token);
 
-    return response.status(201).json(newSession);
+    const secureOutputValues = authorization.filterOutput(
+      authenticatedUser,
+      "read:session",
+      newSession,
+    );
+
+    return response.status(201).json(secureOutputValues);
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       registerFailedAttempt(rateLimitKey);
@@ -195,5 +201,11 @@ async function deleteHandler(request, response) {
   const expiredSession = await session.expireById(sessionObject.id);
   controller.clearSessionCookie(response);
 
-  return response.status(200).json(expiredSession);
+  const secureOutputValues = authorization.filterOutput(
+    request.context.user,
+    "read:session",
+    expiredSession,
+  );
+
+  return response.status(200).json(secureOutputValues);
 }

@@ -1,15 +1,17 @@
 import { createRouter } from "next-connect";
 import database from "infra/database.js";
 import controller from "infra/controller";
+import authorization from "models/authorization";
 
 const router = createRouter();
 
+router.use(controller.injectAnonymousOrUser);
 router.get(getHandler);
 
 export default router.handler(controller.errorHandlers);
 
 // Handler principal para GET /api/v1/status. Consulta o status do banco e retorna em formato JSON.
-async function getHandler(_, response) {
+async function getHandler(request, response) {
   const updatedAt = new Date().toISOString();
   const appEnv = process.env.APP_ENV || process.env.NODE_ENV || "unknown";
 
@@ -21,7 +23,7 @@ async function getHandler(_, response) {
     values: [process.env.POSTGRES_DB],
   });
 
-  response.status(200).json({
+  const statusObject = {
     updated_at: updatedAt,
     dependencies: {
       database: {
@@ -29,5 +31,13 @@ async function getHandler(_, response) {
         ...databaseVersionResult.rows[0],
       },
     },
-  });
+  };
+
+  const secureOutputValues = authorization.filterOutput(
+    request.context?.user,
+    "read:status",
+    statusObject,
+  );
+
+  response.status(200).json(secureOutputValues);
 }

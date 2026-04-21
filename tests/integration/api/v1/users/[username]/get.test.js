@@ -25,9 +25,7 @@ describe("GET /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: createdUser.id,
         username: "robsonBS",
-        email: createdUser.email,
         features: ["read:activation_token"],
-        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -49,9 +47,7 @@ describe("GET /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: createdUser.id,
         username: "robsonBS",
-        email: createdUser.email,
         features: ["read:activation_token"],
-        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -73,9 +69,7 @@ describe("GET /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: createdUser.id,
         username: "robsonbs",
-        email: createdUser.email,
         features: ["read:activation_token"],
-        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
