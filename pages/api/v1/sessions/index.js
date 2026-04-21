@@ -39,12 +39,7 @@ async function postHandler(request, response) {
       userInputValues.password,
     );
 
-    if (
-      !authorization.canPerformAction(
-        authenticateUser.features,
-        "create:session",
-      )
-    ) {
+    if (!authorization.canPerformAction(authenticateUser, "create:session")) {
       throw new ForbiddenError({
         message: "Você não tem permissão para criar uma sessão",
         action:

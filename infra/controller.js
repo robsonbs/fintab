@@ -100,8 +100,8 @@ function injectAnonymous(request) {
 
 function canRequestMiddleware(requiredFeature) {
   return (request, _, next) => {
-    const userTryingFeatures = request.context?.user?.features || [];
-    if (!authorization.canPerformAction(userTryingFeatures, requiredFeature)) {
+    const userTrying = request.context?.user || { features: [] };
+    if (!authorization.canPerformAction(userTrying, requiredFeature)) {
       throw new ForbiddenError({
         message: "Você não tem permissão para acessar este recurso.",
         action: `Verifique se o seu usuário possui a feature "${requiredFeature}"`,

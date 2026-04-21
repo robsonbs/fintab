@@ -1,19 +1,26 @@
-function canPerformAction(userFeatures, requiredFeature) {
+function canPerformAction(user, requiredFeature, resource) {
   let authorized = false;
 
-  if (userFeatures.includes(requiredFeature)) {
+  if (user.features.includes(requiredFeature)) {
     authorized = true;
+  }
+
+  if (requiredFeature === "update:user" && resource) {
+    authorized = false;
+    if (user.id === resource.id) {
+      authorized = true;
+    }
   }
 
   return authorized;
 }
 
-function canPerformAnyAction(userFeatures, requiredFeatures) {
-  return requiredFeatures.some((feature) => userFeatures.includes(feature));
+function canPerformAnyAction(user, requiredFeatures) {
+  return requiredFeatures.some((feature) => user.features.includes(feature));
 }
 
-function canPerformAllActions(userFeatures, requiredFeatures) {
-  return requiredFeatures.every((feature) => userFeatures.includes(feature));
+function canPerformAllActions(user, requiredFeatures) {
+  return requiredFeatures.every((feature) => user.features.includes(feature));
 }
 
 export default {
