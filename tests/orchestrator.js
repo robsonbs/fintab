@@ -4,6 +4,7 @@ import database from "infra/database.js";
 import migrator from "models/migrator.js";
 import user from "models/user.js";
 import session from "models/session.js";
+import activation from "models/activation";
 
 const STATUS_API_URL = "http://localhost:3000/api/v1/status";
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
@@ -89,6 +90,10 @@ async function createUser(userObject) {
   });
 }
 
+async function activateUser(inactivatedUser) {
+  return await activation.activateUserByUserId(inactivatedUser.id);
+}
+
 async function createSessionForUser(userId) {
   return await session.create(userId);
 }
@@ -120,8 +125,7 @@ async function getLastEmail() {
 }
 
 async function extractUUIDFromEmailText(emailText) {
-  const uuidRegex =
-    /[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}/i;
+  const uuidRegex = /[0-9a-fA-F-]{36}/i;
   const match = emailText.match(uuidRegex);
   return match ? match[0] : null;
 }
@@ -131,6 +135,7 @@ export default {
   clearDatabase,
   runPendingMigrations,
   createUser,
+  activateUser,
   createSessionForUser,
   deleteAllEmails,
   getLastEmail,

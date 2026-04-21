@@ -10,6 +10,7 @@ import {
   ForbiddenError,
 } from "./errors.js";
 import user from "models/user.js";
+import authorization from "models/authorization.js";
 
 function onNoMatchHandler(request, response) {
   const publicErrorObject = new MethodNotAllowedError();
@@ -100,10 +101,10 @@ function injectAnonymous(request) {
 function canRequestMiddleware(requiredFeature) {
   return (request, _, next) => {
     const userTryingFeatures = request.context?.user?.features || [];
-    if (!userTryingFeatures.includes(requiredFeature)) {
+    if (!authorization.canPerformAction(userTryingFeatures, requiredFeature)) {
       throw new ForbiddenError({
-        message: "Você não tem permissão para executar essa ação",
-        action: `Verifique se seu usuário tem a feature "${requiredFeature}" necessária para realizar essa ação.`,
+        message: "Você não tem permissão para acessar este recurso.",
+        action: `Verifique se o seu usuário possui a feature "${requiredFeature}"`,
       });
     }
 

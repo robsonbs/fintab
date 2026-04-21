@@ -1,7 +1,12 @@
 import { createRouter } from "next-connect";
 import controller from "infra/controller.js";
-import { TooManyRequestsError, UnauthorizedError } from "infra/errors.js";
+import {
+  TooManyRequestsError,
+  UnauthorizedError,
+  ForbiddenError,
+} from "infra/errors.js";
 import authentication from "models/authentication.js";
+import authorization from "models/authorization.js";
 import session from "models/session.js";
 
 const LOGIN_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
@@ -18,7 +23,7 @@ const router = createRouter();
 
 router.use(controller.injectAnonymousOrUser);
 router.post(controller.canRequestMiddleware("create:session"), postHandler);
-router.delete(deleteHandler);
+router.delete(controller.canRequestMiddleware("read:session"), deleteHandler);
 
 export default router.handler(controller.errorHandlers);
 
@@ -33,6 +38,19 @@ async function postHandler(request, response) {
       userInputValues.email,
       userInputValues.password,
     );
+
+    if (
+      !authorization.canPerformAction(
+        authenticateUser.features,
+        "create:session",
+      )
+    ) {
+      throw new ForbiddenError({
+        message: "Você não tem permissão para criar uma sessão",
+        action:
+          "Verifique se seu usuário tem a feature necessária para realizar essa ação.",
+      });
+    }
 
     clearFailedAttempts(rateLimitKey);
 

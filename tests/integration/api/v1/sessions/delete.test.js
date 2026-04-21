@@ -64,6 +64,7 @@ describe("GET /api/v1/sessions", () => {
 
     test("With valid session", async () => {
       const createUser = await orchestrator.createUser();
+      await orchestrator.activateUser(createUser);
       const sessionObject = await orchestrator.createSessionForUser(
         createUser.id,
       );

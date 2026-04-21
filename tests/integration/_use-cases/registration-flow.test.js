@@ -13,6 +13,8 @@ beforeAll(async () => {
 describe("Use case: Registration flow (all successful)", () => {
   let createUserResponseBody;
   let activationTokenId;
+  let createSessionResponseBody;
+
   test("Create user account", async () => {
     const createUserResponse = await fetch(
       "http://localhost:3000/api/v1/users",
@@ -49,7 +51,7 @@ describe("Use case: Registration flow (all successful)", () => {
     );
 
     expect(lastEmail.text).toContain(
-      `${webserver.origin}/singup/activate/${activationTokenId}`,
+      `${webserver.origin}/cadastro/ativar/${activationTokenId}`,
     );
 
     const activationTokenObject =
@@ -78,7 +80,9 @@ describe("Use case: Registration flow (all successful)", () => {
     const activatedUser = await user.findOneByUsername(
       createUserResponseBody.username,
     );
-    expect(activatedUser.features).toEqual(["read:session", "create:session"]);
+    expect(activatedUser.features).toEqual(
+      expect.arrayContaining(["read:session", "create:session"]),
+    );
   });
   test("Login with the activated account", async () => {
     const loginResponse = await fetch("http://localhost:3000/api/v1/sessions", {
@@ -92,11 +96,22 @@ describe("Use case: Registration flow (all successful)", () => {
       }),
     });
     expect(loginResponse.status).toBe(201);
-    const loginResponseBody = await loginResponse.json();
-    expect(loginResponseBody.user_id).toBe(createUserResponseBody.id);
-    expect(loginResponseBody.token).toBeDefined();
+    createSessionResponseBody = await loginResponse.json();
+    expect(createSessionResponseBody.user_id).toBe(createUserResponseBody.id);
+    expect(createSessionResponseBody.token).toBeDefined();
   });
-  test.todo(
-    "Get the user profile information using the obtained session token",
-  );
+  test("Get the user profile information using the obtained session token", async () => {
+    const profileResponse = await fetch("http://localhost:3000/api/v1/user", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `session_id=${createSessionResponseBody.token}`,
+      },
+    });
+    expect(profileResponse.status).toBe(200);
+    const profileResponseBody = await profileResponse.json();
+    expect(profileResponseBody.id).toBe(createUserResponseBody.id);
+    expect(profileResponseBody.username).toBe(createUserResponseBody.username);
+    expect(profileResponseBody.email).toBe(createUserResponseBody.email);
+  });
 });

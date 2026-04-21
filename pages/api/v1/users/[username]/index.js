@@ -12,7 +12,6 @@ export default router.handler(controller.errorHandlers);
 async function getHandler(request, response) {
   const { username } = request.query;
   const userFound = await user.findOneByUsername(username);
-  console.log("User found:", userFound);
   return response.status(200).json(userFound);
 }
 
