@@ -110,7 +110,7 @@ async function activateUserByUserId(userId) {
 
 async function sendEmailToUser(user, activationToken) {
   await email.send({
-    from: "Robson Souza Dev <contato@robsonsouza.dev.br>",
+    from: "Robson Souza Dev <contato@mkt.robsonsouza.dev.br>",
     to: user.email,
     subject: "Ative seu cadastro no Robson Souza Dev!",
     text: `${user.username}, clique no link abaixo para ativar seu cadastro no Robson Souza Dev:
