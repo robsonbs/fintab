@@ -38,7 +38,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       });
     });
 
-    test("With unique username and email", async () => {
+    test("With unique `username` and `email`", async () => {
       const createdUser = await orchestrator.createUser({
         username: "usuario1",
         email: "usuario1@robsonsouza.dev.br",
@@ -69,7 +69,7 @@ describe("PATCH /api/v1/users/[username]", () => {
   });
 
   describe("Default user", () => {
-    test("With non-existing username", async () => {
+    test("With non-existing `username`", async () => {
       const createdUser = await orchestrator.createUser();
       const sessionObject = await orchestrator.createSessionForUser(
         createdUser.id,
@@ -99,7 +99,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       });
     });
 
-    test("with duplicated 'username'", async () => {
+    test("with duplicated `username`", async () => {
       const createdUser1 = await orchestrator.createUser({
         username: "usuario1",
       });
@@ -178,7 +178,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       });
     });
 
-    test("With duplicated 'email'", async () => {
+    test("With duplicated `email`", async () => {
       const createdUser1 = await orchestrator.createUser({
         email: "usuario1@robsonsouza.dev.br",
       });

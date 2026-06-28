@@ -53,7 +53,7 @@ describe("POST /api/v1/users", () => {
       expect(correctPasswordMatch).toBe(true);
     });
 
-    test('With duplicated "email"', async () => {
+    test("With duplicated `email`", async () => {
       const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
@@ -91,7 +91,7 @@ describe("POST /api/v1/users", () => {
       expect(responseBody.status_code).toEqual(400);
     });
 
-    test('With duplicated "username"', async () => {
+    test("With duplicated `username`", async () => {
       await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
