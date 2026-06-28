@@ -63,9 +63,24 @@ async function getClient() {
   }
 }
 
+async function closePool() {
+  if (!pool) {
+    return;
+  }
+
+  try {
+    await pool.end();
+  } catch (error) {
+    console.error("Error closing database pool:", error);
+  } finally {
+    pool = undefined;
+  }
+}
+
 const dataset = {
   query,
   getClient,
+  closePool,
 };
 
 export default dataset;

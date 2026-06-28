@@ -28,8 +28,8 @@
     "services:up": "docker compose -f infra/compose.yaml up -d",
     "services:wait:database": "node infra/scripts/wait-for-postgres.js",
     "test:sessions": "npm run services:up && concurrently --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose tests/integration/api/v1/sessions/post.test.js\"",
-    "test:watch": "jest --watchAll --runInBand --verbose",
-    "test": "npm run services:up && concurrently --passthrough-arguments --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose\""
+    "test:watch": "jest --watchAll --runInBand --detectOpenHandles --verbose",
+    "test": "npm run services:up && concurrently --passthrough-arguments --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest --runInBand --detectOpenHandles --verbose\""
   },
   "engines": {
     "node": "24"

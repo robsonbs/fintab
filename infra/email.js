@@ -24,6 +24,14 @@ async function send(mailOptions) {
   }
 }
 
-const functions = { send };
+async function closeTransporter() {
+  try {
+    transporter.close();
+  } catch (error) {
+    console.error("Error closing email transporter:", error);
+  }
+}
+
+const functions = { send, closeTransporter };
 
 export default functions;
