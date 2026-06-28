@@ -5,10 +5,8 @@ import orchestrator from "tests/orchestrator";
 beforeAll(async () => {
   // Aguarda os servicos antes de iniciar os cenarios de integracao.
   await orchestrator.waitForAllServices();
-});
-
-beforeEach(async () => {
   // Reseta o estado do banco antes de cada teste para garantir isolamento.
+  await orchestrator.clearDatabase();
   await orchestrator.runPendingMigrations();
 });
 
