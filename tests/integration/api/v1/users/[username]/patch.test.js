@@ -3,6 +3,7 @@ import activation from "models/activation.js";
 import password from "models/password.js";
 import orchestrator from "tests/orchestrator.js";
 import webserver from "infra/webserver";
+import user from "models/user";
 
 beforeAll(async () => {
   // Aguarda os servicos antes de iniciar os cenarios de integracao.
@@ -273,10 +274,24 @@ describe("PATCH /api/v1/users/[username]", () => {
         },
       );
       expect(response.status).toEqual(200);
+
       const responseBody = await response.json();
+
+      expect(responseBody).toEqual({
+        id: responseBody.id,
+        username: createdUser.username,
+        features: ["create:session", "read:session", "update:user"],
+        created_at: responseBody.created_at,
+        updated_at: responseBody.updated_at,
+      });
+
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
       expect(responseBody.updated_at > responseBody.created_at).toEqual(true);
+
+      const userInDatabase = await user.findOneByUsername(createdUser.username);
+
+      expect(userInDatabase.email).toBe("usuario2@robsonsouza.dev.br");
     });
     test("With unique username", async () => {
       const createdUser = await orchestrator.createUser({
