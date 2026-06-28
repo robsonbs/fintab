@@ -122,9 +122,7 @@ describe("GET /api/v1/migrations", () => {
         username: "defaultuser",
       });
       await orchestrator.activateUser(createdUser);
-      const sessionObject = await orchestrator.createSessionForUser(
-        createdUser.id,
-      );
+      const sessionObject = await orchestrator.createSession(createdUser);
 
       return { createdUser, sessionObject };
     };
@@ -185,8 +183,8 @@ describe("GET /api/v1/migrations", () => {
         "create:migration",
       ]);
 
-      const privilegedSessionObject = await orchestrator.createSessionForUser(
-        activatedPrivilegedUser.id,
+      const privilegedSessionObject = await orchestrator.createSession(
+        activatedPrivilegedUser,
       );
 
       return { activatedPrivilegedUser, privilegedSessionObject };

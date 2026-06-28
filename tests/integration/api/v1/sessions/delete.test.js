@@ -41,9 +41,7 @@ describe("GET /api/v1/sessions", () => {
         doNotFake: ["nextTick"],
       });
       const createUser = await orchestrator.createUser();
-      const sessionObject = await orchestrator.createSessionForUser(
-        createUser.id,
-      );
+      const sessionObject = await orchestrator.createSession(createUser);
       jest.useRealTimers();
 
       const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
@@ -66,9 +64,7 @@ describe("GET /api/v1/sessions", () => {
     test("With valid session", async () => {
       const createUser = await orchestrator.createUser();
       await orchestrator.activateUser(createUser);
-      const sessionObject = await orchestrator.createSessionForUser(
-        createUser.id,
-      );
+      const sessionObject = await orchestrator.createSession(createUser);
 
       const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
         method: "DELETE",

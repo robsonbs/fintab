@@ -131,9 +131,8 @@ describe("GET /api/v1/status", () => {
         defaultUser.id,
       );
 
-      const defaultSessionObject = await orchestrator.createSessionForUser(
-        activatedDefaultUser.id,
-      );
+      const defaultSessionObject =
+        await orchestrator.createSession(activatedDefaultUser);
 
       return { activatedDefaultUser, defaultSessionObject };
     };
@@ -174,8 +173,8 @@ describe("GET /api/v1/status", () => {
       await orchestrator.addFeaturesToUser(activatedPrivilegedUser, [
         "read:status:all",
       ]);
-      const privilegedSessionObject = await orchestrator.createSessionForUser(
-        activatedPrivilegedUser.id,
+      const privilegedSessionObject = await orchestrator.createSession(
+        activatedPrivilegedUser,
       );
 
       return { activatedPrivilegedUser, privilegedSessionObject };

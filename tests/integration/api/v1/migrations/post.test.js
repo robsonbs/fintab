@@ -106,9 +106,7 @@ describe("POST /api/v1/migrations", () => {
     const createDefaultUserAndSession = async () => {
       const defaultUser = await orchestrator.createUser();
       await activation.activateUserByUserId(defaultUser.id);
-      const sessionObject = await orchestrator.createSessionForUser(
-        defaultUser.id,
-      );
+      const sessionObject = await orchestrator.createSession(defaultUser);
 
       return { defaultUser, defaultSessionObject: sessionObject };
     };
@@ -160,9 +158,7 @@ describe("POST /api/v1/migrations", () => {
         "read:migration",
         "create:migration",
       ]);
-      const sessionObject = await orchestrator.createSessionForUser(
-        privilegedUser.id,
-      );
+      const sessionObject = await orchestrator.createSession(privilegedUser);
 
       return { privilegedUser, privilegedSessionObject: sessionObject };
     };

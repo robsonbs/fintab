@@ -95,8 +95,8 @@ async function activateUser(inactivatedUser) {
   return await activation.activateUserByUserId(inactivatedUser.id);
 }
 
-async function createSessionForUser(userId) {
-  return await session.create(userId);
+async function createSession(userObject) {
+  return await session.create(userObject.id);
 }
 
 // limpa todos os emails recebidos pelo servidor de email, garantindo isolamento entre cenarios de teste.
@@ -142,7 +142,7 @@ export default {
   runPendingMigrations,
   createUser,
   activateUser,
-  createSessionForUser,
+  createSession,
   deleteAllEmails,
   getLastEmail,
   extractUUIDFromEmailText,
