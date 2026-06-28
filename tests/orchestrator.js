@@ -5,8 +5,9 @@ import migrator from "models/migrator.js";
 import user from "models/user.js";
 import session from "models/session.js";
 import activation from "models/activation";
+import webserver from "infra/webserver";
 
-const STATUS_API_URL = "http://localhost:3000/api/v1/status";
+const STATUS_API_URL = `${webserver.origin}/api/v1/status`;
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
 const CLEAR_DATABASE_QUERY =

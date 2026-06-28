@@ -1,3 +1,4 @@
+import webserver from "infra/webserver";
 import orchestrator from "tests/orchestrator";
 
 beforeAll(async () => {
@@ -5,7 +6,7 @@ beforeAll(async () => {
   await orchestrator.waitForAllServices();
 });
 
-const STATUS_API_URL = "http://localhost:3000/api/v1/status";
+const STATUS_API_URL = `${webserver.origin}/api/v1/status`;
 
 // Busca o endpoint de status e retorna resposta + corpo JSON.
 async function fetchStatus() {

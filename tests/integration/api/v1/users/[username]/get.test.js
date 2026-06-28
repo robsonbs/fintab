@@ -1,5 +1,6 @@
 import { version as uuidVersion } from "uuid";
 import orchestrator from "tests/orchestrator.js";
+import webserver from "infra/webserver";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
@@ -17,7 +18,7 @@ describe("GET /api/v1/users/[username]", () => {
         username: "robsonBS",
       });
       const response = await fetch(
-        `http://localhost:3000/api/v1/users/${createdUser.username}`,
+        `${webserver.origin}/api/v1/users/${createdUser.username}`,
       );
       expect(response.status).toEqual(200);
       const responseBody = await response.json();
@@ -40,7 +41,7 @@ describe("GET /api/v1/users/[username]", () => {
       });
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/users/${createdUser.username.toLowerCase()}`,
+        `${webserver.origin}/api/v1/users/${createdUser.username.toLowerCase()}`,
       );
       expect(response.status).toEqual(200);
       const responseBody = await response.json();
@@ -62,7 +63,7 @@ describe("GET /api/v1/users/[username]", () => {
       });
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/users/${createdUser.username}`,
+        `${webserver.origin}/api/v1/users/${createdUser.username}`,
       );
       expect(response.status).toEqual(200);
       const responseBody = await response.json();
@@ -78,7 +79,7 @@ describe("GET /api/v1/users/[username]", () => {
 
     test("Should return 404 for non-existing user", async () => {
       const response = await fetch(
-        "http://localhost:3000/api/v1/users/nonexistinguser",
+        `${webserver.origin}/api/v1/users/nonexistinguser`,
       );
       expect(response.status).toEqual(404);
       const responseBody = await response.json();

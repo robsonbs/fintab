@@ -16,20 +16,17 @@ describe("Use case: Registration flow (all successful)", () => {
   let createSessionResponseBody;
 
   test("Create user account", async () => {
-    const createUserResponse = await fetch(
-      "http://localhost:3000/api/v1/users",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "newuser",
-          email: "newuser@example.com",
-          password: "validpassword",
-        }),
+    const createUserResponse = await fetch(`${webserver.origin}/api/v1/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        username: "newuser",
+        email: "newuser@example.com",
+        password: "validpassword",
+      }),
+    });
     expect(createUserResponse.status).toBe(201);
 
     createUserResponseBody = await createUserResponse.json();
@@ -57,7 +54,7 @@ describe("Use case: Registration flow (all successful)", () => {
     expect(activationTokenObject.user_id).toBe(createUserResponseBody.id);
     expect(activationTokenObject.used_at).toBeNull();
 
-    expect(lastEmail.sender).toBe("<contato@robsonsouza.dev.br>");
+    expect(lastEmail.sender).toBe("<contato@mkt.robsonsouza.dev.br>");
     expect(lastEmail.recipients[0]).toBe("<newuser@example.com>");
     expect(lastEmail.subject).toBe("Ative seu cadastro no Robson Souza Dev!");
     expect(lastEmail.text).toContain("newuser");
@@ -65,7 +62,7 @@ describe("Use case: Registration flow (all successful)", () => {
 
   test("Activate account using the link received in the email", async () => {
     const activationResponse = await fetch(
-      `http://localhost:3000/api/v1/activations/${activationTokenId}`,
+      `${webserver.origin}/api/v1/activations/${activationTokenId}`,
       {
         method: "PATCH",
       },
@@ -83,7 +80,7 @@ describe("Use case: Registration flow (all successful)", () => {
     );
   });
   test("Login with the activated account", async () => {
-    const loginResponse = await fetch("http://localhost:3000/api/v1/sessions", {
+    const loginResponse = await fetch(`${webserver.origin}/api/v1/sessions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +96,7 @@ describe("Use case: Registration flow (all successful)", () => {
     expect(createSessionResponseBody.token).toBeDefined();
   });
   test("Get the user profile information using the obtained session token", async () => {
-    const profileResponse = await fetch("http://localhost:3000/api/v1/user", {
+    const profileResponse = await fetch(`${webserver.origin}/api/v1/user`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

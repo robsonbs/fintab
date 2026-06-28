@@ -1,3 +1,4 @@
+import webserver from "infra/webserver";
 import activation from "models/activation";
 import orchestrator from "tests/orchestrator";
 
@@ -11,7 +12,7 @@ beforeEach(async () => {
   await orchestrator.runPendingMigrations();
 });
 
-const STATUS_API_URL = "http://localhost:3000/api/v1/status";
+const STATUS_API_URL = `${webserver.origin}/api/v1/status`;
 
 // Busca o endpoint de status e retorna resposta + corpo JSON.
 async function fetchStatus(sessionToken) {

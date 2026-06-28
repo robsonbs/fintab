@@ -1,6 +1,7 @@
+import webserver from "infra/webserver.js";
 import orchestrator from "../orchestrator.js";
 
-const BASE_URL = "http://localhost:3000/api/v1/sessions";
+const BASE_URL = `${webserver.origin}/api/v1/sessions`;
 const ITERATIONS = Number.parseInt(process.env.TIMING_ITERATIONS || "40", 10);
 
 async function measureScenario(payloadFactory) {

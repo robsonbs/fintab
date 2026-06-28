@@ -1,3 +1,4 @@
+import webserver from "infra/webserver";
 import orchestrator from "tests/orchestrator";
 
 beforeAll(async () => {
@@ -5,7 +6,7 @@ beforeAll(async () => {
   await orchestrator.waitForAllServices();
 });
 
-const API_URL = "http://localhost:3000/api/v1/migrations";
+const API_URL = `${webserver.origin}/api/v1/migrations`;
 const UNSUPPORTED_METHODS = ["PUT", "DELETE", "PATCH", "OPTIONS"];
 
 function expectMethodNotAllowedJsonResponse(response) {

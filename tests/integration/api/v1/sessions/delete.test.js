@@ -1,6 +1,7 @@
 import orchestrator from "tests/orchestrator.js";
 import session from "models/session.js";
 import setCookieParser from "set-cookie-parser";
+import webserver from "infra/webserver";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
@@ -15,7 +16,7 @@ describe("GET /api/v1/sessions", () => {
   describe("Default user", () => {
     test("With non-existent session", async () => {
       const nonexistentToken = "00000000-0000-0000-0000-000000000000";
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
         method: "DELETE",
         headers: {
           cookie: `session_id=${nonexistentToken}`,
@@ -45,7 +46,7 @@ describe("GET /api/v1/sessions", () => {
       );
       jest.useRealTimers();
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
         method: "DELETE",
         headers: {
           cookie: `session_id=${sessionObject.token}`,
@@ -69,7 +70,7 @@ describe("GET /api/v1/sessions", () => {
         createUser.id,
       );
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
         method: "DELETE",
         headers: {
           cookie: `session_id=${sessionObject.token}`,
@@ -121,7 +122,7 @@ describe("GET /api/v1/sessions", () => {
 
       // Double check assertions
       const doubleCheckResponse = await fetch(
-        "http://localhost:3000/api/v1/user",
+        `${webserver.origin}/api/v1/user`,
         {
           method: "GET",
           headers: {

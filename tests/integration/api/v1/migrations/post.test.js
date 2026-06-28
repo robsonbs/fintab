@@ -1,3 +1,4 @@
+import webserver from "infra/webserver";
 import activation from "models/activation";
 import orchestrator from "tests/orchestrator";
 
@@ -6,7 +7,7 @@ beforeAll(async () => {
   await orchestrator.waitForAllServices();
 });
 
-const API_URL = "http://localhost:3000/api/v1/migrations";
+const API_URL = `${webserver.origin}/api/v1/migrations`;
 
 function expectJsonResponse(response, status) {
   expect(response.status).toBe(status);
