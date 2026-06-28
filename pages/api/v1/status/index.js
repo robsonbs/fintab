@@ -3,12 +3,10 @@ import database from "infra/database.js";
 import controller from "infra/controller";
 import authorization from "models/authorization";
 
-const router = createRouter();
-
-router.use(controller.injectAnonymousOrUser);
-router.get(getHandler);
-
-export default router.handler(controller.errorHandlers);
+export default createRouter()
+  .use(controller.injectAnonymousOrUser)
+  .get(getHandler)
+  .handler(controller.errorHandlers);
 
 // Handler principal para GET /api/v1/status. Consulta o status do banco e retorna em formato JSON.
 async function getHandler(request, response) {

@@ -19,13 +19,11 @@ const TRUST_PROXY_HEADER = process.env.TRUST_PROXY === "true";
 
 const failedAttemptsByKey = new Map();
 
-const router = createRouter();
-
-router.use(controller.injectAnonymousOrUser);
-router.post(controller.canRequestMiddleware("create:session"), postHandler);
-router.delete(controller.canRequestMiddleware("read:session"), deleteHandler);
-
-export default router.handler(controller.errorHandlers);
+export default createRouter()
+  .use(controller.injectAnonymousOrUser)
+  .post(controller.canRequestMiddleware("create:session"), postHandler)
+  .delete(controller.canRequestMiddleware("read:session"), deleteHandler)
+  .handler(controller.errorHandlers);
 
 async function postHandler(request, response) {
   const rateLimitKey = getRateLimitKey(request);
