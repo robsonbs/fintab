@@ -112,7 +112,6 @@ describe("GET /api/v1/sessions", () => {
         value: "invalid",
         path: "/",
         httpOnly: true,
-        sameSite: "Strict",
         maxAge: -1,
       });
 

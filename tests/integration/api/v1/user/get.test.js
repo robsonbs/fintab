@@ -94,7 +94,7 @@ describe("GET /api/v1/user", () => {
         value: sessionObject.token,
         path: "/",
         httpOnly: true,
-        sameSite: "Strict",
+        sameSite: "Lax",
         maxAge: session.EXPIRATION_IN_MILLISECONDS / 1000,
       });
     });
@@ -129,7 +129,6 @@ describe("GET /api/v1/user", () => {
         maxAge: -1,
         path: "/",
         httpOnly: true,
-        sameSite: "Strict",
       });
     });
 
@@ -173,7 +172,6 @@ describe("GET /api/v1/user", () => {
         maxAge: -1,
         path: "/",
         httpOnly: true,
-        sameSite: "Strict",
       });
     });
 

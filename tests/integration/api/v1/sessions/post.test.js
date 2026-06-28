@@ -146,7 +146,7 @@ describe("POST /api/v1/sessions", () => {
         value: responseBody.token,
         path: "/",
         httpOnly: true,
-        sameSite: "Strict",
+        sameSite: "Lax",
         maxAge: session.EXPIRATION_IN_MILLISECONDS / 1000,
       });
     });
