@@ -62,10 +62,13 @@ async function getClient() {
     throw serviceErrorObject;
   }
 }
-export default {
+
+const dataset = {
   query,
   getClient,
 };
+
+export default dataset;
 
 function getSSLValues() {
   if (process.env.POSTGRES_CA) {

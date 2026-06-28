@@ -24,4 +24,6 @@ async function send(mailOptions) {
   }
 }
 
-export default { send };
+const functions = { send };
+
+export default functions;

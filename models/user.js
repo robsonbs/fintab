@@ -286,7 +286,7 @@ function validatePassword(password) {
   }
 }
 
-export default {
+const userFunc = {
   create,
   findOneByUsername,
   findOneByEmail,
@@ -295,3 +295,5 @@ export default {
   setFeatures,
   addFeatures,
 };
+
+export default userFunc;

@@ -161,9 +161,11 @@ function validateResource(resource) {
   }
 }
 
-export default {
+const authorization = {
   canPerformAction,
   canPerformAnyAction,
   canPerformAllActions,
   filterOutput,
 };
+
+export default authorization;

@@ -9,6 +9,8 @@ function getOrigin() {
   return process.env.ORIGIN;
 }
 
-export default {
+const webserver = {
   origin: getOrigin(),
 };
+
+export default webserver;

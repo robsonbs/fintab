@@ -42,9 +42,11 @@ async function closeDatabaseClient(dbClient) {
   }
 }
 
-export default {
+const migrator = {
   // Lista apenas as migrations pendentes sem aplicar alteracoes no banco.
   listPendingMigrations: async () => await runMigrations({ dryRun: true }),
   // Aplica as migrations pendentes e devolve o resultado da execucao.
   runPendingMigrations: async () => await runMigrations({ dryRun: false }),
 };
+
+export default migrator;

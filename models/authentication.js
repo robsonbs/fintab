@@ -99,6 +99,8 @@ async function validatePassword(providedPassword, storedPassword) {
   }
 }
 
-export default {
+const authentication = {
   getUser,
 };
+
+export default authentication;

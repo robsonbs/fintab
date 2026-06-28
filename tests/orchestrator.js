@@ -136,7 +136,7 @@ async function addFeaturesToUser(userObject, features) {
   return updatedUser;
 }
 
-export default {
+const orchestrator = {
   waitForAllServices,
   clearDatabase,
   runPendingMigrations,
@@ -148,3 +148,5 @@ export default {
   extractUUIDFromEmailText,
   addFeaturesToUser,
 };
+
+export default orchestrator;

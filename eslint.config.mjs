@@ -1,67 +1,55 @@
-import globals from "globals";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
+import globals from "globals";
+import json from "@eslint/json";
+import markdown from "@eslint/markdown";
+import css from "@eslint/css";
+import { defineConfig } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import jest from "eslint-plugin-jest";
+import prettier from "eslint-config-prettier/flat";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-export default [
-  ...compat.extends(
-    "eslint:recommended",
-    "plugin:jest/recommended",
-    "next/core-web-vitals",
-    "prettier",
-  ),
+export default defineConfig([
   {
-    languageOptions: {
-      globals: {
-        Promise: true,
-      },
-    },
-
-    rules: {
-      "prefer-const": ["error"],
-      "no-const-assign": ["error"],
-      "no-var": ["error"],
-      "no-duplicate-imports": ["error"],
-      "no-unreachable-loop": ["error"],
-      "block-scoped-var": ["error"],
-      "max-depth": ["error", 3],
-      "no-else-return": ["error"],
-      "no-invalid-this": ["error"],
-      "no-labels": ["error"],
-      "no-lonely-if": ["error"],
-      "no-loop-func": ["error"],
-      "no-return-assign": ["error"],
-      "no-sequences": ["error"],
-      "no-undef-init": ["error"],
-      "no-undefined": ["error"],
-      "no-unneeded-ternary": ["error"],
-      "no-unused-expressions": ["error"],
-      "no-useless-return": ["error"],
-      "no-void": ["error"],
-      yoda: ["error"],
-      "import/no-anonymous-default-export": 0,
-      complexity: ["error", 10],
-    },
+    files: ["**/*.{js,mjs,cjs,jsx}"],
+    plugins: { js },
+    extends: ["js/recommended"],
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
+  },
+  ...nextVitals,
+  {
+    files: ["tests/**/*.test.js"],
+    ...jest.configs["flat/recommended"],
   },
   {
-    files: ["tests/**/*"],
-
-    languageOptions: {
-      globals: {
-        ...globals.jest,
-      },
-    },
+    files: ["**/*.json"],
+    plugins: { json },
+    language: "json/json",
+    extends: ["json/recommended"],
+    ignores: ["package-lock.json"],
   },
   {
-    ignores: [".next/*"],
+    files: ["**/*.jsonc"],
+    plugins: { json },
+    language: "json/jsonc",
+    extends: ["json/recommended"],
   },
-];
+  {
+    files: ["**/*.json5"],
+    plugins: { json },
+    language: "json/json5",
+    extends: ["json/recommended"],
+  },
+  {
+    files: ["**/*.md"],
+    plugins: { markdown },
+    language: "markdown/gfm",
+    extends: ["markdown/recommended"],
+  },
+  {
+    files: ["**/*.css"],
+    plugins: { css },
+    language: "css/css",
+    extends: ["css/recommended"],
+  },
+  prettier,
+]);

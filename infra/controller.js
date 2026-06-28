@@ -111,7 +111,7 @@ function canRequestMiddleware(requiredFeature) {
   };
 }
 
-export default {
+const controller = {
   errorHandlers: {
     onNoMatch: onNoMatchHandler,
     onError: onErrorHandler,
@@ -121,3 +121,5 @@ export default {
   injectAnonymousOrUser,
   canRequestMiddleware,
 };
+
+export default controller;

@@ -95,10 +95,12 @@ async function expireById(sessionId) {
   return results.rows[0];
 }
 
-export default {
+const session = {
   create,
   findOneValidByToken,
   renew,
   expireById,
   EXPIRATION_IN_MILLISECONDS,
 };
+
+export default session;

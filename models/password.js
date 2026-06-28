@@ -55,8 +55,10 @@ function getNumberOfSaltRounds() {
   return DEFAULT_NON_PRODUCTION_SALT_ROUNDS;
 }
 
-export default {
+const passwords = {
   hash,
   compare,
   getTimingSafePlaceholderHash,
 };
+
+export default passwords;
