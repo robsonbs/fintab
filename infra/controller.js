@@ -44,7 +44,9 @@ function onErrorHandler(error, request, response) {
 }
 
 function setSessionCookie(response, token) {
-  const setCookie = cookie.serialize("session_id", token, {
+  const setCookie = cookie.stringifySetCookie({
+    name: "session_id",
+    value: token,
     path: "/",
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -55,7 +57,9 @@ function setSessionCookie(response, token) {
 }
 
 function clearSessionCookie(response) {
-  const setCookie = cookie.serialize("session_id", "invalid", {
+  const setCookie = cookie.stringifySetCookie({
+    name: "session_id",
+    value: "invalid",
     path: "/",
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
